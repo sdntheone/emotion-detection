@@ -138,7 +138,7 @@ def main() -> None:
         logger.info("Evaluation pipeline started")
 
         model_path = 'model.pkl'
-        test_data_path = os.path.join("data", "features", "test_bow.csv")
+        test_data_path = os.path.join("data", "features", "test_tfidf.csv")
 
         clf = load_model(model_path)
 

@@ -105,7 +105,7 @@ def main() -> None:
     try:
         logger.info("Model building pipeline started")
 
-        train_data_path = os.path.join("data", "features", "train_bow.csv")
+        train_data_path = os.path.join("data", "features", "train_tfidf.csv")
 
         train_data = load_data(train_data_path)
 

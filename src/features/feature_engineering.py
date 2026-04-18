@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 import yaml
 from typing import Tuple
 from scipy.sparse import csr_matrix
@@ -90,22 +90,22 @@ def convert_to_numpy(
         raise
 
 
-def bag_of_words(
+def tfidf(
     X_train: np.ndarray,
     X_test: np.ndarray
 ) -> Tuple[csr_matrix, csr_matrix]:
 
     try:
-        logger.info("Applying Bag of Words")
+        logger.info("Applying Tfidf")
 
-        vectorizer = CountVectorizer(max_features=max_features)
+        vectorizer = TfidfVectorizer(max_features=max_features)
 
-        X_train_bow = vectorizer.fit_transform(X_train)
-        X_test_bow = vectorizer.transform(X_test)
+        X_train_tfidf = vectorizer.fit_transform(X_train)
+        X_test_tfidf = vectorizer.transform(X_test)
 
-        logger.debug(f"BOW shapes: {X_train_bow.shape}, {X_test_bow.shape}")
+        logger.debug(f"Tfidf shapes: {X_train_tfidf.shape}, {X_test_tfidf.shape}")
 
-        return X_train_bow, X_test_bow
+        return X_train_tfidf, X_test_tfidf
 
     except ValueError as e:
         logger.error(f"Vectorization error: {e}")
@@ -117,8 +117,8 @@ def bag_of_words(
 
 
 def bow_to_df(
-    X_train_bow: csr_matrix,
-    X_test_bow: csr_matrix,
+    X_train_tfidf: csr_matrix,
+    X_test_tfidf: csr_matrix,
     y_train: np.ndarray,
     y_test: np.ndarray
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -126,10 +126,10 @@ def bow_to_df(
     try:
         logger.info("Converting sparse matrix to DataFrame")
 
-        train_df = pd.DataFrame(X_train_bow.toarray())
+        train_df = pd.DataFrame(X_train_tfidf.toarray())
         train_df['label'] = y_train
 
-        test_df = pd.DataFrame(X_test_bow.toarray())
+        test_df = pd.DataFrame(X_test_tfidf.toarray())
         test_df['label'] = y_test
 
         return train_df, test_df
@@ -150,8 +150,8 @@ def save_to_features(train_df: pd.DataFrame, test_df: pd.DataFrame) -> None:
         data_path = os.path.join("data", "features")
         os.makedirs(data_path, exist_ok=True)
 
-        train_path = os.path.join(data_path, "train_bow.csv")
-        test_path = os.path.join(data_path, "test_bow.csv")
+        train_path = os.path.join(data_path, "train_tfidf.csv")
+        test_path = os.path.join(data_path, "test_tfidf.csv")
 
         train_df.to_csv(train_path, index=False)
         test_df.to_csv(test_path, index=False)
@@ -182,7 +182,7 @@ def main() -> None:
 
         X_train, y_train, X_test, y_test = convert_to_numpy(train_data, test_data)
 
-        X_train_bow, X_test_bow = bag_of_words(X_train, X_test)
+        X_train_bow, X_test_bow = tfidf(X_train, X_test)
 
         train_df, test_df = bow_to_df(X_train_bow, X_test_bow, y_train, y_test)
 
